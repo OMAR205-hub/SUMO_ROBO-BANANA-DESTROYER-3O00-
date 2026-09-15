@@ -21,7 +21,7 @@
 #define LEFT_ECHO   35
 
 #define RIGHT_TRIG  18
-#define RIGHT_ECHO  36
+#define RIGHT_ECHO  4      // تم التعديل هنا إلى GPIO 4 بدلاً من 36
 
 // IR Edge Sensor Pins (Digital)
 #define IR_FRONT_LEFT   19
@@ -43,8 +43,6 @@ const int ESCAPE_SPEED = 255;
 const float DETECTION_RANGE = 50.0;
 const float CLOSE_RANGE = 20.0;
 
-// Since we are using digitalRead, the threshold is typically HIGH (when detecting white line/edge) 
-// or LOW depending on your sensor module. Adjust if needed.
 const int IR_THRESHOLD = HIGH; 
 
 // ============================================================================
@@ -338,12 +336,6 @@ void searchForOpponent()
 
     if (rotateRight) spinRight(SEARCH_SPEED);
     else spinLeft(SEARCH_SPEED);
-
-    currentState = SEARCHING;
-}
-        spinLeft(SEARCH_SPEED);
-    }
-
 
     currentState = SEARCHING;
 }
