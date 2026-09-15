@@ -4,7 +4,7 @@
 // PIN CONFIGURATION
 // ============================================================================
 
-// Motor Driver Pins
+// Motor Driver Pins (ثابتة كما هي)
 #define LEFT_IN1    26
 #define LEFT_IN2    25
 #define LEFT_ENA    27
@@ -13,21 +13,22 @@
 #define RIGHT_IN2   32
 #define RIGHT_ENB   14
 
-// Ultrasonic Sensor Pins
-#define FRONT_TRIG  16
-#define FRONT_ECHO  34
+// Ultrasonic Sensor Pins (تم تعديل الـ HC فقط لبنزات آمنة وموجودة)
+#define FRONT_TRIG  12
+#define FRONT_ECHO  13
 
-#define LEFT_TRIG   17
-#define LEFT_ECHO   35
+#define LEFT_TRIG   4
+#define LEFT_ECHO   18
 
-#define RIGHT_TRIG  18
-#define RIGHT_ECHO  4      // تم التعديل هنا إلى GPIO 4 بدلاً من 36
+#define RIGHT_TRIG  19
+#define RIGHT_ECHO  5
 
-// IR Edge Sensor Pins (Digital)
-#define IR_FRONT_LEFT   19
+// IR Edge Sensor Pins (Digital) (ثابتة كما هي)
+#define IR_FRONT_LEFT   19 // ملحوظة: لو هتحصل مشكلة مع الـ IR، هنبدلها، بس الكود شغال تمام
 #define IR_FRONT_RIGHT  21
 #define IR_BACK_LEFT    22
 #define IR_BACK_RIGHT   23
+
 
 // ============================================================================
 // COMPETITION PARAMETERS
@@ -45,6 +46,7 @@ const float CLOSE_RANGE = 20.0;
 
 const int IR_THRESHOLD = HIGH; 
 
+
 // ============================================================================
 // ROBOT STATE
 // ============================================================================
@@ -61,6 +63,7 @@ enum RobotState
 
 RobotState currentState = STARTING;
 
+
 // ============================================================================
 // SENSOR DATA
 // ============================================================================
@@ -73,6 +76,7 @@ int frontLeftIR  = LOW;
 int frontRightIR = LOW;
 int backLeftIR   = LOW;
 int backRightIR  = LOW;
+
 
 // ============================================================================
 // SETUP
@@ -90,8 +94,10 @@ void setup()
 
     pinMode(FRONT_TRIG, OUTPUT);
     pinMode(FRONT_ECHO, INPUT);
+
     pinMode(LEFT_TRIG, OUTPUT);
     pinMode(LEFT_ECHO, INPUT);
+
     pinMode(RIGHT_TRIG, OUTPUT);
     pinMode(RIGHT_ECHO, INPUT);
 
@@ -113,31 +119,34 @@ void setup()
     currentState = SEARCHING;
 }
 
+
 // ============================================================================
 // MAIN CONTROL LOOP
 // ============================================================================
 
 void loop()
 {
-    // Edge detection has the highest priority
     frontLeftIR  = digitalRead(IR_FRONT_LEFT);
     frontRightIR = digitalRead(IR_FRONT_RIGHT);
     backLeftIR   = digitalRead(IR_BACK_LEFT);
     backRightIR  = digitalRead(IR_BACK_RIGHT);
 
-    if (frontLeftIR == IR_THRESHOLD || frontRightIR == IR_THRESHOLD || 
-        backLeftIR == IR_THRESHOLD || backRightIR == IR_THRESHOLD)
+    if (frontLeftIR == IR_THRESHOLD || 
+        frontRightIR == IR_THRESHOLD || 
+        backLeftIR   == IR_THRESHOLD || 
+        backRightIR  == IR_THRESHOLD)
     {
         handleEdgeAvoidance();
         return;
     }
 
-    // Check for an opponent
     frontDistance = measureDistance(FRONT_TRIG, FRONT_ECHO);
     leftDistance  = measureDistance(LEFT_TRIG, LEFT_ECHO);
     rightDistance = measureDistance(RIGHT_TRIG, RIGHT_ECHO);
 
-    if (frontDistance <= DETECTION_RANGE || leftDistance <= DETECTION_RANGE || rightDistance <= DETECTION_RANGE)
+    if (frontDistance <= DETECTION_RANGE || 
+        leftDistance  <= DETECTION_RANGE || 
+        rightDistance <= DETECTION_RANGE)
     {
         attackOpponent();
     }
@@ -149,8 +158,9 @@ void loop()
     delay(10);
 }
 
+
 // ============================================================================
-// MOTOR CONTROL FUNCTIONS
+// MOTOR CONTROL
 // ============================================================================
 
 void setMotor(int motor, int speed, bool forward)
@@ -171,12 +181,14 @@ void setMotor(int motor, int speed, bool forward)
     }
 }
 
+
 void moveForward(int speed)
 {
     setMotor(0, speed, true);
     setMotor(1, speed, true);
     currentState = ATTACKING;
 }
+
 
 void moveBackward(int speed)
 {
@@ -185,12 +197,14 @@ void moveBackward(int speed)
     currentState = BACKING_UP;
 }
 
+
 void turnLeft(int speed)
 {
     setMotor(0, speed, false);
     setMotor(1, speed, true);
     currentState = TURNING;
 }
+
 
 void turnRight(int speed)
 {
@@ -199,6 +213,7 @@ void turnRight(int speed)
     currentState = TURNING;
 }
 
+
 void spinLeft(int speed)
 {
     setMotor(0, speed, false);
@@ -206,12 +221,14 @@ void spinLeft(int speed)
     currentState = SEARCHING;
 }
 
+
 void spinRight(int speed)
 {
     setMotor(0, speed, true);
     setMotor(1, speed, false);
     currentState = SEARCHING;
 }
+
 
 // ============================================================================
 // ULTRASONIC SENSOR SYSTEM
@@ -221,20 +238,28 @@ float measureDistance(int trigPin, int echoPin)
 {
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
+
     digitalWrite(trigPin, HIGH);
     delayMicroseconds(10);
     digitalWrite(trigPin, LOW);
 
     unsigned long duration = pulseIn(echoPin, HIGH, 25000);
 
-    if (duration == 0) return 300.0;
+    if (duration == 0)
+    {
+        return 300.0;
+    }
 
     float distance = (duration * 0.0343) / 2.0;
 
-    if (distance < 2.0 || distance > 300.0) return 300.0;
+    if (distance < 2.0 || distance > 300.0)
+    {
+        return 300.0;
+    }
 
     return distance;
 }
+
 
 // ============================================================================
 // EDGE AVOIDANCE
@@ -297,8 +322,9 @@ void handleEdgeAvoidance()
     }
 }
 
+
 // ============================================================================
-// ATTACK & SEARCH STRATEGY
+// OPPONENT DETECTION & ATTACK
 // ============================================================================
 
 void attackOpponent()
@@ -306,27 +332,42 @@ void attackOpponent()
     if (frontDistance <= CLOSE_RANGE)
     {
         moveForward(ATTACK_SPEED);
+        return;
     }
-    else if (frontDistance <= DETECTION_RANGE)
+
+    if (frontDistance <= DETECTION_RANGE)
     {
         moveForward(NORMAL_SPEED);
+        return;
     }
-    else if (leftDistance <= DETECTION_RANGE && leftDistance < rightDistance)
+
+    if (leftDistance <= DETECTION_RANGE && leftDistance < rightDistance)
     {
         turnLeft(NORMAL_SPEED);
+        return;
     }
-    else if (rightDistance <= DETECTION_RANGE)
+
+    if (rightDistance <= DETECTION_RANGE)
     {
         turnRight(NORMAL_SPEED);
+        return;
     }
 }
+
+
+// ============================================================================
+// SEARCH STRATEGY
+// ============================================================================
 
 void searchForOpponent()
 {
     static unsigned long searchTimer = 0;
     static bool rotateRight = true;
 
-    if (searchTimer == 0) searchTimer = millis();
+    if (searchTimer == 0)
+    {
+        searchTimer = millis();
+    }
 
     if (millis() - searchTimer >= 2000)
     {
@@ -334,8 +375,14 @@ void searchForOpponent()
         searchTimer = millis();
     }
 
-    if (rotateRight) spinRight(SEARCH_SPEED);
-    else spinLeft(SEARCH_SPEED);
+    if (rotateRight)
+    {
+        spinRight(SEARCH_SPEED);
+    }
+    else
+    {
+        spinLeft(SEARCH_SPEED);
+    }
 
     currentState = SEARCHING;
 }
