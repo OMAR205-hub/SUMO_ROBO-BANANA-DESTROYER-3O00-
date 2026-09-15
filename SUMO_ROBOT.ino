@@ -4,7 +4,7 @@
 // PIN CONFIGURATION
 // ============================================================================
 
-// Motor Driver Pins (ثابتة كما هي)
+// Motor Driver Pins
 #define LEFT_IN1    26
 #define LEFT_IN2    25
 #define LEFT_ENA    27
@@ -13,7 +13,7 @@
 #define RIGHT_IN2   32
 #define RIGHT_ENB   14
 
-// Ultrasonic Sensor Pins (تم تعديل الـ HC فقط لبنزات آمنة وموجودة)
+// Ultrasonic Sensor Pins
 #define FRONT_TRIG  12
 #define FRONT_ECHO  13
 
@@ -23,8 +23,8 @@
 #define RIGHT_TRIG  19
 #define RIGHT_ECHO  5
 
-// IR Edge Sensor Pins (Digital) (ثابتة كما هي)
-#define IR_FRONT_LEFT   19 // ملحوظة: لو هتحصل مشكلة مع الـ IR، هنبدلها، بس الكود شغال تمام
+// IR Edge Sensor Pins (Digital)
+#define IR_FRONT_LEFT   15
 #define IR_FRONT_RIGHT  21
 #define IR_BACK_LEFT    22
 #define IR_BACK_RIGHT   23
@@ -106,7 +106,6 @@ void setup()
     pinMode(IR_BACK_LEFT, INPUT);
     pinMode(IR_BACK_RIGHT, INPUT);
 
-    // Stop motors initially
     digitalWrite(LEFT_IN1, LOW);
     digitalWrite(LEFT_IN2, LOW);
     digitalWrite(RIGHT_IN1, LOW);
